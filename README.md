@@ -135,19 +135,24 @@ With this package you could provide an input resembling this in graphl:
 
 ```json
 {
-  "getOrganisationsDto": {
+  "getOrganisationsRequestDto": {
     "paginateOptions": {
       "page": 1,
       "limit": 10
     },
     "findOptions": {
      "where": {
-       "logicalOperator": "AND",
-      "filters":{
+       "logicalOperator": "OR",
+      "filters":[{
         "fields": ["numberOfEmployees"],
-        "operators": ["Between"],
-        "values":["[100,1000]"]
-      }
+        "operators": ["Equal"],
+        "values":["1000"]
+      },
+      {
+        "fields": ["numberOfEmployees"],
+        "operators": ["Equal"],
+        "values":["400"]
+      }]
     }
     }
   }
@@ -257,8 +262,6 @@ and have nice advanced filtering in typeorm.
 
 *Note*: We used `class-valdiator` and `class-transformer` for validation
 
-
-
 2. In`dto/get-organisations.dto.ts`:
 
 ```typescript
@@ -288,7 +291,6 @@ export class GetOrganisationsDto {
 
 The `PaginationOptionsDto` was crafted with `Pagination` from `nestjs-typeorm-paginate`
 
-
 3. In`organisation.resolver.ts`
 
 ```typescript
@@ -301,8 +303,6 @@ The `PaginationOptionsDto` was crafted with `Pagination` from `nestjs-typeorm-pa
    return this.organisationSvc.getOrganisations(getOrganisationsDto);
  }
 ```
-
-
 
 4. In`organisation.service.ts`
 
@@ -354,12 +354,9 @@ public async getOrganisations(
 
 Notice we used `nestjs-typeorm-paginate` for pagination but you can use whatever applies in your implementation.
 
-
 ## Logical Operators
 
 ### Making an `AND` filter query/request
-
-
 
 ```typescript
 const mockFilterInput: Filter = {
@@ -379,13 +376,7 @@ const mockFilterInput: Filter = {
     };
 ```
 
-
-
-
-
 ### Making an `OR` filter query/request
-
-
 
 ```typescript
  const mockFilterInput: Filter = {
@@ -409,8 +400,6 @@ const mockFilterInput: Filter = {
       ],
     };
 ```
-
-
 
 ### Making an `AND OR` filter query/request
 
@@ -443,7 +432,6 @@ const mockFilterInput: Filter = {
       ],
     };
 ```
-
 
 *Note*:  For array types like between, in, etc, make sure to JSON.stringify the array.
 
