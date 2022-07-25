@@ -3,7 +3,7 @@ export enum LogicalOperator {
   AND = 'AND',
 }
 
-type TOrderDirection = 'ASC' | 'DESC' | 'asc' | 'desc';
+export type TOrderDirection = 'ASC' | 'DESC' | 'asc' | 'desc';
 
 export enum ConditionalOperator {
   Not = 'Not',
