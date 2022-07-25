@@ -6,7 +6,7 @@ Consider the following example using nestjs:
 
 *entities/organisation.entity.ts*
 
-```
+```typescript
 @Entity({
   name: 'organisations',
 })
@@ -77,7 +77,7 @@ export class OrganisationEntity {
 
 The type `FindOptionsWhere` for find operations in typeorm:
 
-```
+```typescript
 export declare type FindOptionsWhere<Entity> = {
     [P in keyof Entity]?: FindOptionsWhereProperty<NonNullable<Entity[P]>>;
 };
@@ -85,7 +85,7 @@ export declare type FindOptionsWhere<Entity> = {
 
 Assuming we use this to create a `FindOrganisation` DTO:
 
-```
+```typescript
 class FindOrganisationDTO implements FindOptionsWhere<OrganisationEntity> {
   @Field(() => !D, {nullable: true})
   id?: string;
@@ -133,7 +133,7 @@ The DTO class above would work for simple filters. Even then you have the follow
 
 With this package you could provide an input resembling this in graphl:
 
-```
+```json
 {
   "getOrganisationsDto": {
     "paginateOptions": {
@@ -160,9 +160,9 @@ and have nice advanced filtering in typeorm.
 
 ## Usage
 
-1. Write the following input types in src/lib/filter.ts:
+1. Write the following input types in `src/lib/filter.ts`:
 
-   ```
+   ```typescript
    import { Field, InputType, registerEnumType } from '@nestjs/graphql';
    import {
      IsArray,
@@ -174,38 +174,24 @@ and have nice advanced filtering in typeorm.
    } from 'class-validator';
    import { getEnumKeys } from 'src/shared/utils';
    import { Type } from 'class-transformer';
-   import {FilterMember, LogicalOperator, TOrderDirection, ConditionalOperator} from 'typeorm-advanced-filter-util'
+   import {
+     TOrderDirection,
+     LogicalOperator,
+     ConditionalOperator,
+     Filter,
+     OrderBy,
+     FilterMember,
+   } from 'typeorm-advanced-filter-util';
+
+   registerEnumType(ConditionalOperator, {
+     name: 'ConditionalOperator',
+   });
+   registerEnumType(LogicalOperator, {
+     name: 'LogicalOperator',
+   });
 
    @InputType()
-   export class Filter {
-     @Field(() => LogicalOperator)
-     @IsDefined()
-     @IsString()
-     @IsIn(getEnumKeys(LogicalOperator))
-     logicalOperator: LogicalOperator;
-
-     @Field(() => [FilterMember])
-     @IsDefined()
-     @IsArray()
-     filters: FilterMember[];
-   }
-
-   @InputType()
-   export class OrderBy {
-     @Field(() => [String])
-     @IsDefined()
-     @IsArray()
-     fields: string[];
-
-     @Field(() => [String])
-     @IsDefined()
-     @IsArray()
-     values: TOrderDirection[];
-   }
-
-
-   @InputType()
-   export class FilterMember {
+   export class FilterMemberDto implements FilterMember {
      @Field(() => [String])
      @IsDefined()
      @IsArray()
@@ -223,133 +209,160 @@ and have nice advanced filtering in typeorm.
    }
 
    @InputType()
-   export class FindOptions {
-     @Field(() => Filter, { nullable: true })
-     @IsOptional()
-     @ValidateNested({ each: true })
-     @Type(() => Filter)
-     where?: Filter;
+   export class FilterDto implements Filter {
+     @Field(() => LogicalOperator)
+     @IsDefined()
+     @IsString()
+     @IsIn(getEnumKeys(LogicalOperator))
+     logicalOperator: LogicalOperator;
 
-     @Field(() => OrderBy, { nullable: true })
-     @IsOptional()
-     @ValidateNested({ each: true })
-     @Type(() => OrderBy)
-     order?: OrderBy;
+     @Field(() => [FilterMemberDto])
+     @IsDefined()
+     @IsArray()
+     filters: FilterMemberDto[];
    }
 
-   registerEnumType(ConditionalOperator, {
-     name: 'ConditionalOperator',
-   });
-   registerEnumType(LogicalOperator, {
-     name: 'LogicalOperator',
-   });
+   @InputType()
+   export class OrderByDto implements OrderBy {
+     @Field(() => [String])
+     @IsDefined()
+     @IsArray()
+     fields: string[];
+
+     @Field(() => [String])
+     @IsDefined()
+     @IsArray()
+     values: TOrderDirection[];
+   }
+
+   @InputType()
+   export class FindOptionsDto {
+     @Field(() => FilterDto, { nullable: true })
+     @IsOptional()
+     @ValidateNested({ each: true })
+     @Type(() => FilterDto)
+     where?: Filter;
+
+     @Field(() => OrderByDto, { nullable: true })
+     @IsOptional()
+     @ValidateNested({ each: true })
+     @Type(() => OrderByDto)
+     order?: OrderByDto;
+   }
 
    export { ConditionalOperator, LogicalOperator };
    ```
 
-*Note:* Import all missing types from `'typeorm-advanced-filter-util'` except `ConditionalOperator` and `LogicalOperator`
+*Note*: Import `ConditionalOperator` and `LogicalOperator` from your code's `src/lib/filter.ts` in your `controllers/resolvers/services/etc`. This is because you've registered them in `src/lib/filter.ts` using `registerEnumType`(nestjs code-first approach). Therefore the metadata are associated with these. Hence importing them from `'typeorm-advanced-filter-util'` and re-registering them elsewhere in your code will cause nestjs graphql to throw a duplicate type error.
 
-*Note*: Import `ConditionalOperator` and `LogicalOperator` from your code's `src/lib/filter.ts`. This is because you've registered them here using `registerEnumType`(nestjs code-first approach). Therefore the metadata are associated with these. Hence importing them from `'typeorm-advanced-filter-util'` and re-registering them elsewhere in your code will cause nestjs graphql to throw a duplicate type error.
-
-*Note*: We used class-transformer for validation
-
-2. In `dto/get-organisations.dto.ts`:
-
-   ```
-   import { Pagination } from 'nestjs-typeorm-paginate';
-   import { FindOptions } from 'src/lib/filter.ts';
-   import {
-     InputType,
-     Field
-   } from '@nestjs/graphql';
-   import { Type } from 'class-transformer';
-   import { ValidateNested, IsOptional } from 'class-validator';
+*Note*: We used `class-valdiator` and `class-transformer` for validation
 
 
-   @InputType()
-   export class GetOrganisationsDto {
-     @ValidateNested({ each: true })
-     @Type(() => PaginationOptionsDto)
-     @Field(() => PaginationOptionsDto)
-     paginateOptions: PaginationOptionsDto;
 
-     @IsOptional()
-     @ValidateNested({ each: true })
-     @Type(() => FindOptions)
-     @Field(() => FindOptions, { nullable: true })
-     findOptions?: FindOptions;
+2. In`dto/get-organisations.dto.ts`:
+
+```typescript
+import { FindOptionsDto } from 'src/lib/filter.ts';
+import {
+InputType,
+Field
+} from '@nestjs/graphql';
+import { Type } from 'class-transformer';
+import { ValidateNested, IsOptional } from 'class-validator';
+
+
+@InputType()
+export class GetOrganisationsDto {
+  @ValidateNested({ each: true })
+  @Type(() => PaginationOptionsDto)
+  @Field(() => PaginationOptionsDto)
+  paginateOptions: PaginationOptionsDto;
+
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => FindOptionsDto)
+  @Field(() => FindOptionsDto, { nullable: true })
+  findOptions?: FindOptionsDto;
+}
+```
+
+The `PaginationOptionsDto` was crafted with `Pagination` from `nestjs-typeorm-paginate`
+
+
+3. In`organisation.resolver.ts`
+
+```typescript
+ @Query((_returns) => GetOrganisationsResponseDto)
+ public async getOrganisations(
+   @Args('getOrganisationsDto')
+   getOrganisationsDto: GetOrganisationsDto,
+ ): Promise<GetOrganisationsResponseDto> {
+
+   return this.organisationSvc.getOrganisations(getOrganisationsDto);
+ }
+```
+
+
+
+4. In`organisation.service.ts`
+
+```typescript
+import { buildWhere, Filter , OrderBy, buildOrder} from 'typeorm-advanced-filter-util';
+import { FindManyOptions, Repository } from 'typeorm';
+import {
+paginate,
+IPaginationOptions,
+IPaginationMeta,
+} from 'nestjs-typeorm-paginate';
+
+
+public async getOrganisations(
+   data: GetOrganisationsDto,
+ ): Promise<GetOrganisationsResponseDto> {
+   try {
+     const { paginateOptions, findOptions } = data;
+     const paginationOptions: IPaginationOptions<IPaginationMeta> = {
+       ...(paginateOptions as IPaginationOptions),
+       route: '/organisation',
+     };
+     const searchOptions: FindManyOptions<OrganisationEntity> = {
+       where: findOptions?.where ? buildWhere(<Filter>findOptions.where) : {},
+       order: findOptions?.order
+         ? buildOrder(<OrderBy>findOptions?.order)
+         : {},
+     };
+     const organisations = await paginate<OrganisationEntity>(
+       this.repository,
+       paginationOptions,
+       searchOptions,
+     );
+
+     return {
+       error: [],
+       status: HttpStatus.OK,
+       organisations: getStruct(organisations),
+     };
+   } catch (error) {
+     return {
+       error: [],
+       status: HttpStatus.INTERNAL_SERVER_ERROR,
+       organisations: null,
+     };
    }
-   ```
-
-3. in `organisation.resolver.ts`
-
-   ```
-
-     @Query((_returns) => GetOrganisationsResponseDto)
-     public async getOrganisations(
-       @Args('getOrganisationsDto')
-       getOrganisationsDto: GetOrganisationsDto,
-     ): Promise<GetOrganisationsResponseDto> {
-
-       return this.organisationSvc.getOrganisations(getOrganisationsDto);
-     }
-   ```
-
-4. in `organisation.service.ts`
-
-   ```
-   import { buildWhere, Filter , OrderBy, buildOrder} from 'typeorm-advanced-filter-util';
-   import { FindManyOptions, Repository } from 'typeorm';
-   import {
-     paginate,
-     IPaginationOptions,
-     IPaginationMeta,
-   } from 'nestjs-typeorm-paginate';
-
-
-
-    public async getOrganisations(
-       data: GetOrganisationsDto,
-     ): Promise<GetOrganisationsResponseDto> {
-       try {
-         const { paginateOptions, findOptions } = data;
-         const paginationOptions: IPaginationOptions<IPaginationMeta> = {
-           ...(paginateOptions as IPaginationOptions),
-           route: '/organisation',
-         };
-         const searchOptions: FindManyOptions<OrganisationEntity> = {
-           where: findOptions?.where ? buildWhere(<Filter>findOptions.where) : {},
-           order: findOptions?.order
-             ? buildOrder(<OrderBy>findOptions?.order)
-             : {},
-         };
-         const organisations = await paginate<OrganisationEntity>(
-           this.repository,
-           paginationOptions,
-           searchOptions,
-         );
-
-         return {
-           error: [],
-           status: HttpStatus.OK,
-           organisations: getStruct(organisations),
-         };
-       } catch (error) {
-         return {
-           error: [],
-           status: HttpStatus.INTERNAL_SERVER_ERROR,
-           organisations: null,
-         };
-       }
-     }
-   ```
+ }
+```
 
 Notice we used `nestjs-typeorm-paginate` for pagination but you can use whatever applies in your implementation.
 
+
+## Logical Operators
+
 ### Making an `AND` filter query/request
 
-```
-   const mockFilterInput: Filter = {
+
+
+```typescript
+const mockFilterInput: Filter = {
       logicalOperator: LogicalOperator.AND,
       filters: [
         {
@@ -366,10 +379,16 @@ Notice we used `nestjs-typeorm-paginate` for pagination but you can use whatever
     };
 ```
 
+
+
+
+
 ### Making an `OR` filter query/request
 
-```
-   const mockFilterInput: Filter = {
+
+
+```typescript
+ const mockFilterInput: Filter = {
       logicalOperator: LogicalOperator.OR,
       filters: [
         {
@@ -391,10 +410,14 @@ Notice we used `nestjs-typeorm-paginate` for pagination but you can use whatever
     };
 ```
 
+
+
 ### Making an `AND OR` filter query/request
 
-```
- const mockFilterInput: Filter = {
+const mockFilterInput: Filter = {
+
+```typescript
+  const mockFilterInput: Filter = {
       logicalOperator: LogicalOperator.OR,
       filters: [
         {
@@ -421,6 +444,7 @@ Notice we used `nestjs-typeorm-paginate` for pagination but you can use whatever
     };
 ```
 
-*Note*:  For array types like between, in etc, make sure to JSON.stringify the array.
+
+*Note*:  For array types like between, in, etc, make sure to JSON.stringify the array.
 
 Issues, contributions etc are welcome. Thanks 😉
