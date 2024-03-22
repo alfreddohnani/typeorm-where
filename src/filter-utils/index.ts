@@ -1,3 +1,2 @@
-export * from './WhereBuilder';
-export * from './OrderBuilder';
+export * from './where-builder';
 export * from './types';
