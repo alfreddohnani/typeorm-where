@@ -4,9 +4,15 @@
  */
 
 export default {
+  moduleFileExtensions: ["js", "json", "ts"],
+  rootDir: "src",
+  testRegex: ".*\\.spec\\.ts$",
   transform: {
-    "^.+\\.(t|j)sx?$": "ts-jest",
+    "^.+\\.(t|j)s$": "ts-jest",
   },
-  testRegex: "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
+  collectCoverageFrom: ["**/*.(t|j)s"],
+  coverageDirectory: "../coverage",
+  testEnvironment: "node",
+  preset: "ts-jest",
+  coverageReporters: ["json-summary", "text", "lcov"],
 };
