@@ -10,7 +10,7 @@ import {
 import { Order } from './order.entity';
 import { Payment } from './payment.entity';
 
-enum UserTitle {
+export enum UserTitle {
   MR = 'MR',
   MRS = 'MRS',
 }

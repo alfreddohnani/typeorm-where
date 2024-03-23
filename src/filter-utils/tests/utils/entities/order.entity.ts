@@ -11,7 +11,7 @@ import {
 import { User } from './user.entity';
 import { OrderItem } from './order-item.entity';
 
-enum OrderStatus {
+export enum OrderStatus {
   PENDING = 'PENDING',
   PROCESSED = 'PROCESSED',
 }
@@ -24,7 +24,7 @@ export class Order extends BaseEntity {
   @ManyToOne(() => User, (user) => user.orders, { cascade: true, onUpdate: 'CASCADE', onDelete: 'CASCADE' })
   user: User;
 
-  @OneToMany(() => OrderItem, (orderItem) => orderItem.order, { onUpdate: 'CASCADE', nullable: true })
+  @OneToMany(() => OrderItem, (orderItem) => orderItem.order, { cascade: true, onUpdate: 'CASCADE', nullable: true })
   orderItems?: OrderItem[];
 
   @Column({ type: 'enum', enum: OrderStatus })

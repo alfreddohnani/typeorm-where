@@ -16,7 +16,7 @@ export class OrderItem extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Order, (order) => order.orderItems, { cascade: true, onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+  @ManyToOne(() => Order, (order) => order.orderItems, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   order: Order;
 
   @OneToOne(() => Product, { cascade: true, onUpdate: 'CASCADE' })

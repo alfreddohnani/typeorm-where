@@ -20,7 +20,7 @@ export class Product extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   description?: string;
 
-  @Column({ type: 'double' })
+  @Column({ type: 'decimal' })
   price: number;
 
   @ManyToOne(() => Category, (category) => category.products, {
@@ -30,6 +30,9 @@ export class Product extends BaseEntity {
     onDelete: 'CASCADE',
   })
   category?: Category;
+
+  @Column({ type: 'varchar', array: true })
+  tags: string[];
 
   @CreateDateColumn()
   createdAt: string;

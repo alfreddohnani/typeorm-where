@@ -11,7 +11,7 @@ import {
 import { Order } from './order.entity';
 import { User } from './user.entity';
 
-enum PaymentMethod {
+export enum PaymentMethod {
   VISA = 'VISA',
   PAYPAL = 'PAYPAL',
   MASTERCARD = 'MASTERCARD',
@@ -19,7 +19,7 @@ enum PaymentMethod {
   CASH = 'CASH',
 }
 
-enum PaymentStatus {
+export enum PaymentStatus {
   PENDING = 'PENDING',
   SUCCESS = 'SUCCESS',
   FAILED = 'FAILED',
