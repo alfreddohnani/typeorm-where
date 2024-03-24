@@ -47,7 +47,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alfreddohnani/typeorm-advanced-filter-util"
+    "url": "git+https://github.com/alfreddohnani/typeorm-where"
   },
   "files": [
     "dist/**/*"
