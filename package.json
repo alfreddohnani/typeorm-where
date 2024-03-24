@@ -28,7 +28,7 @@
     "test:cov": "jest --coverage --config ./jest.config.ts",
     "test:badges": "yarn test:cov && coverage-badger -r ./coverage/clover.xml -d ./coverage/",
     "prepare": "yarn build",
-    "prepublishOnly": "yarn test && yarn lint",
+    "prepublishOnly": "yarn test && test:badges",
     "preversion": "yarn lint",
     "version": "yarn format && git add -A src",
     "postversion": "git push && git push --tags"

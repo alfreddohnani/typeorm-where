@@ -23,7 +23,7 @@ type Primitive = string | number | boolean;
 type Nullish = null | undefined;
 
 export type Filter<Entity> = {
-  [P in keyof Entity]?: Entity[P] extends Array<Primitive> | Nullish
+  [P in keyof Entity]?: Entity[P] extends Primitive[] | Nullish
     ? NonNullable<TPartialOperatorMap<Primitive>>
     : Entity[P] extends Array<infer I> | Nullish
     ? Filter<I>
@@ -33,7 +33,7 @@ export type Filter<Entity> = {
 };
 
 export type Order<Entity> = {
-  [P in keyof Entity]?: Entity[P] extends Array<Primitive> | Nullish
+  [P in keyof Entity]?: Entity[P] extends Primitive[] | Nullish
     ? OrderValue
     : Entity[P] extends Array<infer I> | Nullish
     ? Order<I>
