@@ -1,5 +1,5 @@
 {
-  "name": "typeorm-advanced-filter-util",
+  "name": "typeorm-where",
   "packageManager": "yarn@4.1.1",
   "author": {
     "name": "Alfred Doh-Nani",
@@ -13,12 +13,13 @@
     "filter options",
     "typeorm filter schema",
     "typeorm filter DTO",
-    "typeorm prisma"
+    "typeorm where",
+    "typeorm prisma-like filter"
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
-  "version": "1.0.4",
+  "version": "1.0.0",
   "scripts": {
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
