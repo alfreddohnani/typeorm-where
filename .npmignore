@@ -1,0 +1,34 @@
+# CI config
+.travis.yml
+.circleci/
+
+# Test and coverage folders
+**/*tests/
+coverage/
+**/*.spec.ts
+
+# Linter rules
+.eslintrc
+.jshintignore
+.jshintrc
+
+# Node modules
+node_modules/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+
+# Git
+.git/
+.gitignore
+
+# Package lock
+package-lock.json
