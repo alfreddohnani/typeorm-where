@@ -18,7 +18,7 @@ import {
   And,
   FindOptionsWhere,
 } from 'typeorm';
-import { FindFilter } from './types';
+import { Filter } from './types';
 import { isPlainObject } from 'lodash';
 
 const OperatorMap = {
@@ -41,52 +41,6 @@ const OperatorMap = {
 };
 
 const operatorMapKeys = Object.keys(OperatorMap);
-
-//todo: examples. remove us
-// type Something = {
-//   name: string;
-//   age: number;
-//   father: {
-//     house: boolean;
-//     street: string;
-//     holiday: string[];
-//   };
-// };
-
-//todo: example
-// const filt: FindFilter<Something> = {
-//   age: {
-//     $not: {
-//       $equal: 10,
-//       $between: [2, 4],
-//     },
-//     $lessThan: 20,
-//     $moreThan: 230,
-//     $between: [200, 500],
-//   },
-//   father: {
-//     street: { $equal: 'Nmai Dzorn' },
-//     holiday: {
-//       $in: ['Xmas', 'New Year'],
-//     },
-//     house: {
-//       $not: {
-//         $equal: {
-//           $ilike: {
-//             $lessThan: true,
-//           },
-//         },
-//       },
-//       $moreThan: true,
-//     },
-//   },
-//   name: {
-//     $equal: '',
-//     $like: '',
-//     $lessThan: { $equal: '', $lessThan: '' },
-//     $between: ['', ''],
-//   },
-// };
 
 const primitiveTypes = ['string', 'number', 'bigint', 'boolean', 'symbol'];
 
@@ -134,7 +88,7 @@ function getFindOperator(key: string, value: any) {
   }
 }
 
-function compileToOperatorAst<Entity>(filterMap: FindFilter<Entity>) {
+function compileToOperatorAst<Entity>(filterMap: Filter<Entity>) {
   const ast = filterMap as Record<string, any>;
   const keys = Object.keys(ast);
   for (let i = 0; i < keys.length; i++) {
@@ -155,7 +109,8 @@ function compileToOperatorAst<Entity>(filterMap: FindFilter<Entity>) {
 function joinOperatorValues(operatorValues: any[]) {
   return And(...operatorValues);
 }
-function getFindFilterMap(ast: Record<string, any>) {
+
+function operatorAstToFilter(ast: Record<string, any>) {
   const keys = Object.keys(ast);
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
@@ -169,7 +124,7 @@ function getFindFilterMap(ast: Record<string, any>) {
           delete ast[key];
         }
       } else {
-        getFindFilterMap(subVal);
+        operatorAstToFilter(subVal);
       }
     }
   }
@@ -177,19 +132,19 @@ function getFindFilterMap(ast: Record<string, any>) {
   return ast;
 }
 
-export function getWhereMap<Entity>(
-  filter: FindFilter<Entity>[] | FindFilter<Entity>,
-): FindOptionsWhere<Entity>[] | FindOptionsWhere<Entity> | null {
-  if (!filter) return null;
+type WhereFunc = {
+  <Entity>(filter: Filter<Entity>): FindOptionsWhere<Entity>;
+  <Entity>(filter: Filter<Entity>[]): FindOptionsWhere<Entity>[];
+};
+
+export const where: WhereFunc = <Entity>(filter: Entity) => {
+  if (!filter) return filter;
   if (Array.isArray(filter)) {
     return filter.map((f) => {
       const ast = compileToOperatorAst(f);
-      return getFindFilterMap(ast);
+      return operatorAstToFilter(ast);
     });
   }
   const ast = compileToOperatorAst(filter);
-  return getFindFilterMap(ast);
-}
-
-// todo: example call
-// console.dir(getWhereMap(filt), { depth: Infinity });
+  return operatorAstToFilter(ast);
+};
