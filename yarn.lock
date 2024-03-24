@@ -941,7 +941,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*":
+"@types/node@npm:*, @types/node@npm:^20.11.30":
   version: 20.11.30
   resolution: "@types/node@npm:20.11.30"
   dependencies:
@@ -1651,6 +1651,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"clone@npm:~0.1.11":
+  version: 0.1.19
+  resolution: "clone@npm:0.1.19"
+  checksum: 10c0/593474606fc5ab34c94364bd1e8d58526f63cbc8061236b73ffafb1675174206e9d0317aab66a87159128aef082500c3bd50063da64acc2604b7af8762d92a24
+  languageName: node
+  linkType: hard
+
 "co@npm:^4.6.0":
   version: 4.6.0
   resolution: "co@npm:4.6.0"
@@ -1697,7 +1704,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^2.12.1":
+"commander@npm:^2.12.1, commander@npm:^2.8.1":
   version: 2.20.3
   resolution: "commander@npm:2.20.3"
   checksum: 10c0/74c781a5248c2402a0a3e966a0a2bba3c054aad144f5c023364be83265e796b20565aa9feff624132ff629aa64e16999fa40a743c10c12f7c61e96a794b99288
@@ -1741,6 +1748,19 @@ __metadata:
   version: 1.0.3
   resolution: "core-util-is@npm:1.0.3"
   checksum: 10c0/90a0e40abbddfd7618f8ccd63a74d88deea94e77d0e8dbbea059fa7ebebb8fbb4e2909667fe26f3a467073de1a542ebe6ae4c73a73745ac5833786759cd906c9
+  languageName: node
+  linkType: hard
+
+"coverage-badger@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "coverage-badger@npm:1.0.1"
+  dependencies:
+    commander: "npm:^2.8.1"
+    xml-splitter: "npm:~1.2.1"
+    xtend: "npm:~4.0.1"
+  bin:
+    coverage-badger: ./lib/cli.js
+  checksum: 10c0/31fad57cba5aa0eced6ba4d9613db3b281a08c28d8e4e01583a82aee934bd0ef73b243913c466d67cf1595b7e2bc799642825afa74a667620240e7dfa662d38e
   languageName: node
   linkType: hard
 
@@ -3969,6 +3989,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sax@npm:~0.5.5":
+  version: 0.5.8
+  resolution: "sax@npm:0.5.8"
+  checksum: 10c0/ef56d843498de543b715e02ea528416c99ffa5f1c4b8b234bc4574d714389a968a0cab05397182c5ccccbb7b123c1b00399e14a0456aadc9b4dde1e0f063698e
+  languageName: node
+  linkType: hard
+
 "semver@npm:7.x, semver@npm:^7.3.5, semver@npm:^7.5.3":
   version: 7.6.0
   resolution: "semver@npm:7.6.0"
@@ -4636,13 +4663,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typeorm-advanced-filter-util@workspace:.":
+"typeorm-where@workspace:.":
   version: 0.0.0-use.local
-  resolution: "typeorm-advanced-filter-util@workspace:."
+  resolution: "typeorm-where@workspace:."
   dependencies:
     "@testcontainers/postgresql": "npm:^10.7.2"
     "@types/jest": "npm:^28"
     "@types/lodash": "npm:^4.17.0"
+    "@types/node": "npm:^20.11.30"
+    coverage-badger: "npm:^1.0.1"
     jest: "npm:^28"
     lodash: "npm:^4.17.21"
     pg: "npm:^8.11.3"
@@ -4916,7 +4945,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xtend@npm:^4.0.0":
+"xml-splitter@npm:~1.2.1":
+  version: 1.2.1
+  resolution: "xml-splitter@npm:1.2.1"
+  dependencies:
+    clone: "npm:~0.1.11"
+    sax: "npm:~0.5.5"
+  checksum: 10c0/b184cee5fbd438e2e9e33b5f49c0bd3b6d7bfae02eccc4379a4a5249265f93109519b0779de0d7037df973c975e8a5e0f3eb70c0ed1ee07048dec4b38bb27ba6
+  languageName: node
+  linkType: hard
+
+"xtend@npm:^4.0.0, xtend@npm:~4.0.1":
   version: 4.0.2
   resolution: "xtend@npm:4.0.2"
   checksum: 10c0/366ae4783eec6100f8a02dff02ac907bf29f9a00b82ac0264b4d8b832ead18306797e283cf19de776538babfdcb2101375ec5646b59f08c52128ac4ab812ed0e

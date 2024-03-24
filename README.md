@@ -1,5 +1,7 @@
 # TypeORM-where
 
+![test coverage badge](./coverage/coverage.svg)
+
 ## THE PROBLEM
 
 Single-page applications (SPAs) usually require bespoke backend APIs. The problematic word in that sentence is "bespoke." I have worked as a backend developer in teams where the frontend developers ask for an API to be created for nearly all requirements. Such requirements were usually about filtering some data when given certain parameters. As you can imagine, this gets wearisome quickly, hence introducing friction between both teams.

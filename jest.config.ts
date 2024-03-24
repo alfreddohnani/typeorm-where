@@ -11,8 +11,9 @@ export default {
     "^.+\\.(t|j)s$": "ts-jest",
   },
   collectCoverageFrom: ["**/*.(t|j)s"],
+  collectCoverage: true,
   coverageDirectory: "../coverage",
   testEnvironment: "node",
   preset: "ts-jest",
-  coverageReporters: ["json-summary", "text", "lcov"],
+  coverageReporters: ["json", "lcov", "text", "clover"],
 };

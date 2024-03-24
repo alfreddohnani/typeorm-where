@@ -1,11 +1,11 @@
 import { DataSource } from 'typeorm';
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-import { User, UserTitle } from './tests/utils/entities/user.entity';
-import { Product } from './tests/utils/entities/product.entity';
-import { Category } from './tests/utils/entities/category.entity';
-import { Order, OrderStatus } from './tests/utils/entities/order.entity';
-import { OrderItem } from './tests/utils/entities/order-item.entity';
-import { Payment, PaymentMethod, PaymentStatus } from './tests/utils/entities/payment.entity';
+import { User, UserTitle } from '../tests/utils/entities/user.entity';
+import { Product } from '../tests/utils/entities/product.entity';
+import { Category } from '../tests/utils/entities/category.entity';
+import { Order, OrderStatus } from '../tests/utils/entities/order.entity';
+import { OrderItem } from '../tests/utils/entities/order-item.entity';
+import { Payment, PaymentMethod, PaymentStatus } from '../tests/utils/entities/payment.entity';
 import { where } from './where-builder';
 
 describe('TypeORM where filter util tests', () => {
