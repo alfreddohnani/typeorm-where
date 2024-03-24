@@ -1,438 +1,756 @@
-## Problem
+# TypeORM-where
 
-Due to the limited support for generic types especially in graphql, it becomes difficult to write generic DTOs(data transfer objects) or generic input types.
+## THE PROBLEM
 
-Consider the following example using nestjs:
+Single-page applications (SPAs) usually require bespoke backend APIs. The problematic word in that sentence is "bespoke." I have worked as a backend developer in teams where the frontend developers ask for an API to be created for nearly all requirements. Such requirements were usually about filtering some data when given certain parameters. As you can imagine, this gets wearisome quickly, hence introducing friction between both teams.
+What if I allowed the frontend developers to filter data on the backend to their hearts' content? That is why I wrote this library.
 
-*entities/organisation.entity.ts*
+## IMPLEMENTATION
+
+TypeORM's find methods take a where object whose filtering is limited to the "equals to" operator. Consequently, to give the frontend team total capacity to filter data, additional operations, including less than, more than, between, like, and not operations, among others, need to be available. To filter data, pass an object literal that describes how to filter records in the database. One can filter with the same object on the backend to avoid using the QueryBuilder for more complex queries. Let us take a look at how you would use it.
+
+## USAGE
+
+We will first see how Typeform-where is used in your backend project, which uses TypeORM, and subsequently see how to pass filters from the front end. There is not much of a difference. Let us assume we have the following entities for a fictional e-commerce app:
 
 ```typescript
-@Entity({
-  name: 'organisations',
-})
-export class OrganisationEntity {
+@Entity({ name: 'users' })
+export class User extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({
-    type: 'varchar',
-    length: 200,
-    unique: true,
-  })
+  @Column({ type: 'varchar' })
+  firsName: string;
+
+  @Column({ type: 'varchar' })
+  lastName: string;
+
+  @Column({ type: 'varchar' })
+  telephone: string;
+
+  @Column({ type: 'integer' })
+  age: number;
+
+  @Column({ type: 'enum', enum: UserTitle })
+  title: string;
+
+  @OneToMany(() => Order, (order) => order.user, { nullable: true })
+  orders?: Order[];
+
+  @OneToMany(() => Payment, (payment) => payment.user, { nullable: true, onUpdate: 'CASCADE' })
+  payments?: Payment[];
+
+  @CreateDateColumn()
+  createdAt: string;
+
+  @UpdateDateColumn()
+  updatedAt: string;
+}
+
+
+@Entity({ name: 'products' })
+export class Product extends BaseEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ type: 'varchar' })
   name: string;
 
-  @Column({
-    type: 'varchar',
-    length: 200,
-    unique: true,
+  @Column({ type: 'text', nullable: true })
+  description?: string;
+
+  @Column({ type: 'decimal' })
+  price: number;
+
+  @ManyToOne(() => Category, (category) => category.products, {
+    cascade: true,
     nullable: true,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
   })
-  registrationNumber?: string;
+  category?: Category;
 
-  @Column({
-    type: 'varchar',
-    nullable: true,
-  })
-  address?: string;
+  @Column({ type: 'varchar', array: true })
+  tags: string[];
 
-  @Column({
-    type: 'varchar',
-    nullable: true,
-  })
-  numberOfEmployees: string;
+  @CreateDateColumn()
+  createdAt: string;
 
-  @Column({
-    type: 'varchar',
-    nullable: true,
-  })
-  countryOfOperation: string;
+  @UpdateDateColumn()
+  updatedAt: string;
+}
 
-  @Column({
-    type: 'varchar',
-    nullable: true,
-    length: 150,
-    unique: true,
-  })
-  email: string;
 
-  @Column({
-    type: 'enum',
-    nullable: true,
-    enum: OrganisationTypeEnum,
-  })
-  organisationType?: OrganisationTypeEnum;
+@Entity({ name: 'payments' })
+export class Payment extends BaseEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @CreateDateColumn({ nullable: true })
-  createdAt?: string;
+  @OneToOne(() => Order, { cascade: true, onUpdate: 'CASCADE' })
+  order: Order;
 
-  @UpdateDateColumn({ nullable: true })
-  updatedAt?: string;
+  @Column({ type: 'enum', enum: PaymentMethod })
+  paymentMethod: PaymentMethod;
 
-  @Column({
-    type: 'varchar',
-  })
-  ownerId: string;
+  @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
+  paymentStatus: PaymentStatus;
+
+  @ManyToOne(() => User, (user) => user.payments, { cascade: true, onUpdate: 'CASCADE' })
+  user: User;
+
+  @CreateDateColumn()
+  createdAt: string;
+
+  @UpdateDateColumn()
+  updatedAt: string;
+}
+
+
+@Entity({ name: 'orders' })
+export class Order extends BaseEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @ManyToOne(() => User, (user) => user.orders, { cascade: true, onUpdate: 'CASCADE', onDelete: 'CASCADE' })
+  user: User;
+
+  @OneToMany(() => OrderItem, (orderItem) => orderItem.order, { cascade: true, onUpdate: 'CASCADE', nullable: true })
+  orderItems?: OrderItem[];
+
+  @Column({ type: 'enum', enum: OrderStatus })
+  status: OrderStatus;
+
+  @CreateDateColumn()
+  createdAt: string;
+
+  @UpdateDateColumn()
+  updatedAt: string;
+}
+
+
+@Entity({ name: 'order_items' })
+export class OrderItem extends BaseEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @ManyToOne(() => Order, (order) => order.orderItems, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+  order: Order;
+
+  @OneToOne(() => Product, { cascade: true, onUpdate: 'CASCADE' })
+  product: Product;
+
+  @Column({ type: 'integer' })
+  quantity: number;
+
+  @CreateDateColumn()
+  createdAt: string;
+
+  @UpdateDateColumn()
+  updatedAt: string;
+}
+
+
+@Entity()
+export class Category extends BaseEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ type: 'varchar' })
+  name: string;
+
+  @OneToMany(() => Product, (product) => product.category, { nullable: true })
+  products?: Product[];
+
+  @CreateDateColumn()
+  createdAt: string;
+
+  @UpdateDateColumn()
+  updatedAt: string;
 }
 ```
 
-The type `FindOptionsWhere` for find operations in typeorm:
+We then create the following records:
 
 ```typescript
-export declare type FindOptionsWhere<Entity> = {
-    [P in keyof Entity]?: FindOptionsWhereProperty<NonNullable<Entity[P]>>;
+const user = await User.create({
+      age: 22,
+      firsName: 'Alfred',
+      lastName: 'Doh-Nani',
+      telephone: '+233544700089',
+      title: UserTitle.MR,
+    }).save();
+
+   const anotherUser = await User.create({
+      age: 22,
+      firsName: 'Mary',
+      lastName: 'Kwawu',
+      telephone: '+233544700088',
+      title: UserTitle.MR,
+    }).save();
+
+    const category = await Category.create({
+      name: 'Accesories',
+    }).save();
+    const products = Product.create([
+      {
+        name: 'Electric Toothbrush',
+        description: 'An ultra modern electric toothbrush with tough bristles that yank your teeth out',
+        price: 40.0,
+        category,
+        tags: ['home', 'accesories', 'bathroom', 'household'],
+      },
+      {
+        name: 'Geisha Soap',
+        description: 'Soap for clean skins',
+        price: 50.0,
+        category,
+        tags: ['home', 'disinfectants', 'chemicals', 'lathers', 'smells good'],
+      },
+      {
+        name: 'Umbra Umbrella',
+        description: 'Need to go out on a rainy day?',
+        price: 60,
+        tags: ['rain', 'rainy days', 'cover', 'shiny days', 'water'],
+      },
+    ]);
+
+    const [toothbrush, soap, umbrella] = await Product.save(products);
+    const firstOrder = await Order.create({
+      user,
+      status: OrderStatus.PENDING,
+      orderItems: OrderItem.create([
+        {
+          product: toothbrush,
+          quantity: 2,
+        },
+        {
+          product: soap,
+          quantity: 10,
+        },
+        {
+          product: umbrella,
+          quantity: 1,
+        },
+      ]),
+    }).save();
+
+    const secondOrder = await Order.create({
+      user,
+      status: OrderStatus.PENDING,
+      orderItems: OrderItem.create([
+        {
+          product: toothbrush,
+          quantity: 12,
+        },
+      ]),
+    }).save();
+
+    const thirdOrder = await Order.create({
+      user,
+      status: OrderStatus.PENDING,
+      orderItems: OrderItem.create([
+        {
+          product: toothbrush,
+          quantity: 1,
+        },
+        {
+          product: soap,
+          quantity: 5,
+        },
+        {
+          product: umbrella,
+          quantity: 34,
+        },
+      ]),
+    }).save();
+
+    const payments = Payment.create([
+      {
+        order: { id: firstOrder.id },
+        paymentMethod: PaymentMethod.MOMO,
+        paymentStatus: PaymentStatus.PENDING,
+        user,
+      },
+      {
+        order: { id: firstOrder.id },
+        paymentMethod: PaymentMethod.MASTERCARD,
+        paymentStatus: PaymentStatus.PENDING,
+        user,
+      },
+      {
+        order: { id: firstOrder.id },
+        paymentMethod: PaymentMethod.VISA,
+        paymentStatus: PaymentStatus.PENDING,
+        user,
+      },
+      {
+        order: { id: secondOrder.id },
+        paymentMethod: PaymentMethod.VISA,
+        paymentStatus: PaymentStatus.FAILED,
+        user,
+      },
+      {
+        order: { id: thirdOrder.id },
+        paymentMethod: PaymentMethod.MOMO,
+        paymentStatus: PaymentStatus.SUCCESS,
+        user,
+      },
+    ]);
+
+    await Payment.save(payments);
+```
+
+We'll use the following operators to filter these records.
+
+### EQUAL OPERATOR
+
+On the backend:
+
+```typescript
+import {where} from 'typeorm-where';
+
+const filter = where<User>({
+        id: {
+          $equal: user.id,
+        },
+      }),
+    });
+
+const res: User | null = await User.findOne({
+         where: filter
+      });
+
+    expect(res).toBeDefined();
+    expect(res?.id).toBe(user.id);
+```
+
+On the frontend:
+
+```typescript
+import type {Filter} from '~/utils'
+
+const filter: Filter<User> = {
+        id: {
+          $equal: user.id,
+        },
+      };
+await fetch(`/some/endpoint?filter=${JSON.stringify(filter)}`);
+
+```
+
+*NB*: When you stringify the filter object on the frontend, remember to parse it on the backend. All the frontend does is to send the filter object in the format above to the backend API. This is replicable for all the other operators we will see.
+
+Where does the type `Filter` come from you ask?:
+
+I didn't think the utility type `Filter` deserved a separate package. Although `typeorm-where` exports it, you shouldn't install the whole package in your frontend app just to use this utility type either.
+
+Hence the immediate solution is to copy the following code and paste it in your utilities as I think of an easier way of doing this.
+
+```typescript
+export type TPartialOperatorMap<V> = Partial<TOperatorMap<V>>;
+export type TOperatorMap<V> = {
+  $not: V | TPartialOperatorMap<V>;
+  $lessThan: V | TPartialOperatorMap<V>;
+  $lessThanOrEqual: V | TPartialOperatorMap<V>;
+  $moreThan: V | TPartialOperatorMap<V>;
+  $moreThanOrEqual: V | TPartialOperatorMap<V>;
+  $equal: V | TPartialOperatorMap<V>;
+  $like: V | TPartialOperatorMap<V>;
+  $ilike: V | TPartialOperatorMap<V>;
+  $between: [V | TPartialOperatorMap<V>, V | TPartialOperatorMap<V>];
+  $in: V[] | TPartialOperatorMap<V>;
+  $any: V[] | TPartialOperatorMap<V>;
+  $isNull: null;
+  $arrayContains: V[] | TPartialOperatorMap<V>;
+  $arrayContainedBy: V[] | TPartialOperatorMap<V>;
+  $arrayOverlap: V[] | TPartialOperatorMap<V>;
+  $raw: V;
+};
+type Primitive = string | number | boolean;
+type Nullish = null | undefined;
+export type Filter<Entity> = {
+  [P in keyof Entity]?: Entity[P] extends Array<Primitive> | Nullish
+    ? NonNullable<TPartialOperatorMap<Primitive>>
+    : Entity[P] extends Array<infer I> | Nullish
+    ? Filter<I>
+    : Entity[P] extends Record<any, any> | Nullish
+    ? Filter<Entity[P]>
+    : NonNullable<TPartialOperatorMap<Entity[P]>>;
 };
 ```
 
-Assuming we use this to create a `FindOrganisation` DTO:
+### NOT OPERATOR
+
+On the backend:
 
 ```typescript
-class FindOrganisationDTO implements FindOptionsWhere<OrganisationEntity> {
-  @Field(() => !D, {nullable: true})
-  id?: string;
+ const res: User[] | null = await User.find({
+      where: where<User>({
+        firsName: {
+          $not: {
+            $equal: 'Alfred',
+          },
+        },
+      }),
+    });
 
-  @Field(() => String, {nullable: true})
-  name?: string;
-
-  @Field(() => String, {nullable: true})
-  registrationNumber?: string;
-
-  @Field(() => String, {nullable: true})
-  address?: string;
-
-  @Field(() => String, {nullable: true})
-  numberOfEmployees?: string;
-
-  @Field(() => String, {nullable: true})
-  countryOfOperation?: string;
-
-  @Field(() => String, {nullable: true})
-  email?: string;
-
-  @Field(() => String, {nullable: true})
-  organisationType?: OrganisationTypeEnum;
-
-  @Field(() => String, {nullable: true})
-  createdAt?: string;
-
-  @Field(() => String, {nullable: true})
-  updatedAt?: string;
-
-  @Field(() => ID, {nullable: true})
-  ownerId: string;
-}
-
+    expect(res.length).toBe(1);
+    expect(res.at(0)?.id).toBe(anotherUser.id);
 ```
 
-The DTO class above would work for simple filters. Even then you have the following problems to name a few:
+### LESS THAN OPERATOR
 
-* If the`OrganisationEntity` changes, you'd have to update it in the DTO as well
-* What if you entity was way larger?
-* What about advanced filters like`between` or`in` ? How do you type those in graphql
+On the backend:
 
-## Solution
+```typescript
+    const res: Product[] = await Product.find({
+      where: where<Product>({
+        price: {
+          $lessThan: 60,
+        },
+      }),
+    });
 
-With this package you could provide an input resembling this in graphl:
+    expect(res.length).toBe(2);
+```
 
-```json
-{
-  "getOrganisationsRequestDto": {
-    "paginateOptions": {
-      "page": 1,
-      "limit": 10
-    },
-    "findOptions": {
-     "where": {
-       "logicalOperator": "OR",
-      "filters":[{
-        "fields": ["numberOfEmployees"],
-        "operators": ["Equal"],
-        "values":["1000"]
+### LESS THAN OR EQUAL OPERATOR
+
+On the backend:
+
+```typescript
+    const res: Product[] = await Product.find({
+      where: where<Product>({
+        price: {
+          $lessThanOrEqual: 60,
+        },
+      }),
+    });
+
+    expect(res.length).toBe(3);
+```
+
+### MORE THAN OPERATOR
+
+On the backend:
+
+```typescript
+    const res: OrderItem[] = await OrderItem.find({
+      where: where<OrderItem>({
+        quantity: {
+          $moreThan: 5,
+        },
+      }),
+    });
+
+    expect(res.length).toBe(3);
+```
+
+### MORE THAN OR EQUAL OPERATOR
+
+On the backend:
+
+```typescript
+    const res: OrderItem[] = await OrderItem.find({
+      where: where<OrderItem>({
+        quantity: {
+          $moreThanOrEqual: 5,
+        },
+      }),
+    });
+
+    expect(res.length).toBe(4);
+```
+
+### LIKE OPERATOR
+
+On the backend:
+
+```typescript
+ const res: Product[] = await Product.find({
+        where: where<Product>({
+          name: {
+            $like: 'geisha soap',
+          },
+        }),
+      });
+      expect(res.length).toBe(0);
+    
+```
+
+```typescript
+       const res: Product[] = await Product.find({
+        where: where<Product>({
+          name: {
+            $like: 'Geisha Soap',
+          },
+        }),
+      });
+      expect(res.length).toBe(1);
+      expect(res.at(0)?.name).toBe('Geisha Soap');
+```
+
+```typescript
+       const res: Product[] = await Product.find({
+        where: where<Product>({
+          description: {
+            $like: '%out%',
+          },
+        }),
+      });
+      expect(res.length).toBe(2);
+```
+
+### iLIKE OPERATOR
+
+On the backend:
+
+```typescript
+const res: Product[] = await Product.find({
+        where: where<Product>({
+          name: {
+            $ilike: 'gEisHa sOAp',
+          },
+        }),
+      });
+
+      expect(res.length).toBe(1);
+      expect(res.at(0)?.name).toBe('Geisha Soap');
+```
+
+```typescript
+      const res: Product[] = await Product.find({
+        where: where<Product>({
+          description: {
+            $ilike: '%OuT%',
+          },
+        }),
+      });
+      expect(res.length).toBe(2);
+```
+
+### BETWEEN OPERATOR
+
+On the backend:
+
+*NB*: The between operator is both lower and upperbound inclusive. e.g, `between:[2, 5]` means `[2,3,4,5]`.
+
+```typescript
+    const res: OrderItem[] = await OrderItem.find({
+      where: where<OrderItem>({
+        quantity: {
+          $between: [5, 12],
+        },
+      }),
+    });
+    expect(res.length).toBe(3);
+```
+
+### IN OPERATOR
+
+On the backend:
+
+```typescript
+    const res: Product | null = await Product.findOne({
+      where: where<Product>({
+        name: {
+          $in: ['Geisha Soap', 'Laptop', 'Smart Phone'],
+        },
+      }),
+    });
+
+    expect(res).toBeDefined();
+    expect(res?.name).toBe('Geisha Soap');
+```
+
+### ANY OPERATOR
+
+On the backend:
+
+```typescript
+    const res: Product[] = await Product.find({
+      where: where<Product>({
+        name: {
+          $any: ['Geisha Soap', 'Laptop', 'Smart Phone'],
+        },
+      }),
+    });
+    expect(res.at(0)?.name).toBe('Geisha Soap');
+```
+
+### ARRAY CONTAINS OPERATOR
+
+On the backend:
+
+```typescript
+    const res1: Product[] = await Product.find({
+      where: where<Product>({
+        tags: {
+          $arrayContains: ['home'],
+        },
+      }),
+    });
+    expect(res1.length).toBe(2);
+
+    const res2: Product[] = await Product.find({
+      where: where<Product>({
+        tags: {
+          $arrayContains: ['rain'],
+        },
+      }),
+    });
+    expect(res2.length).toBe(1);
+
+    const res3: Product[] = await Product.find({
+      where: where<Product>({
+        tags: {
+          $arrayContains: ['home', 'rain'],
+        },
+      }),
+    });
+    expect(res3.length).toBe(0);
+```
+
+### ARRAY CONTAINED BY OPERATOR
+
+On the backend:
+
+```typescript
+    const res1: Product[] = await Product.find({
+      where: where<Product>({
+        tags: {
+          $arrayContainedBy: ['home', 'accesories', 'bathroom', 'household', 'electronics', 'hardware', 'sofware'],
+        },
+      }),
+    });
+    expect(res1.length).toBe(1);
+    expect(res1.at(0)?.name).toBe('Electric Toothbrush');
+
+    const res2: Product[] = await Product.find({
+      where: where<Product>({
+        tags: {
+          $arrayContainedBy: ['home'],
+        },
+      }),
+    });
+    expect(res2.length).toBe(0);
+```
+
+### ARRAY OVERLAP OPERATOR
+
+On the backend:
+
+```typescript
+    const res1: Product[] = await Product.find({
+      where: where<Product>({
+        tags: {
+          $arrayOverlap: ['bathroom', 'rain', 'electronics', 'hardware', 'sofware'],
+        },
+      }),
+    });
+    expect(res1.length).toBe(2);
+
+    const res2: Product[] = await Product.find({
+      where: where<Product>({
+        tags: {
+          $arrayOverlap: ['rain', 'cover', 'electronics', 'hardware', 'sofware'],
+        },
+      }),
+    });
+    expect(res2.length).toBe(1);
+    expect(res2.at(0)?.name).toBe('Umbra Umbrella');
+
+    const res3: Product[] = await Product.find({
+      where: where<Product>({
+        tags: {
+          $arrayOverlap: ['electronics', 'hardware', 'sofware'],
+        },
+      }),
+    });
+    expect(res3.length).toBe(0);
+```
+
+### RAW OPERATOR
+
+On the backend:
+
+```typescript
+    const res: Product[] = await Product.find({
+      where: where<Product>({
+        price: {
+          $raw: 40,
+        },
+      }),
+    });
+
+    expect(res.length).toBe(1);
+```
+
+### OR CONDITION
+
+To filter where you expect the results to be either of the filters, pass an array of filter objects.
+
+On the backend:
+
+```typescript
+    const res: Product[] = await Product.find({
+      where: where<Product>([
+        {
+          description: {
+            $ilike: '%bristles%',
+          },
+        },
+        {
+          description: {
+            $ilike: '%rainy day%',
+          },
+        },
+      ]),
+    });
+
+    expect(res.length).toBe(2);
+```
+
+### NESTED RELATION FILTER
+
+You can filter based on subrelations of an entity.
+
+On the backend:
+
+```typescript
+   const res: Order[] = await Order.find({
+      where: where<Order>({
+        orderItems: {
+          quantity: {
+            $moreThan: 10,
+          },
+        },
+      }),
+      relations: {
+        orderItems: true,
       },
-      {
-        "fields": ["numberOfEmployees"],
-        "operators": ["Equal"],
-        "values":["400"]
-      }]
-    }
-    }
-  }
-}
+    });
+
+    expect(res.length).toBe(2);
 ```
 
-and have nice advanced filtering in typeorm.
+### IS NULL OPERATOR
 
-*Note*: This is not limited only to graphql. You can convert the object above to a query parameter in rest-apis.
+You can filter based on the absence of value of a particular column.
 
-## Usage
-
-1. Write the following input types in `src/lib/filter.ts`:
-
-   ```typescript
-   import { Field, InputType, registerEnumType } from '@nestjs/graphql';
-   import {
-     IsArray,
-     IsDefined,
-     IsIn,
-     IsOptional,
-     IsString,
-     ValidateNested,
-   } from 'class-validator';
-   import { getEnumKeys } from 'src/shared/utils';
-   import { Type } from 'class-transformer';
-   import {
-     TOrderDirection,
-     LogicalOperator,
-     ConditionalOperator,
-     Filter,
-     OrderBy,
-     FilterMember,
-   } from 'typeorm-advanced-filter-util';
-
-   registerEnumType(ConditionalOperator, {
-     name: 'ConditionalOperator',
-   });
-   registerEnumType(LogicalOperator, {
-     name: 'LogicalOperator',
-   });
-
-   @InputType()
-   export class FilterMemberDto implements FilterMember {
-     @Field(() => [String])
-     @IsDefined()
-     @IsArray()
-     fields: string[];
-
-     @Field(() => [String])
-     @IsDefined()
-     @IsArray()
-     values: string[];
-
-     @Field(() => [ConditionalOperator])
-     @IsDefined()
-     @IsArray()
-     operators: ConditionalOperator[];
-   }
-
-   @InputType()
-   export class FilterDto implements Filter {
-     @Field(() => LogicalOperator)
-     @IsDefined()
-     @IsString()
-     @IsIn(getEnumKeys(LogicalOperator))
-     logicalOperator: LogicalOperator;
-
-     @Field(() => [FilterMemberDto])
-     @IsDefined()
-     @IsArray()
-     filters: FilterMemberDto[];
-   }
-
-   @InputType()
-   export class OrderByDto implements OrderBy {
-     @Field(() => [String])
-     @IsDefined()
-     @IsArray()
-     fields: string[];
-
-     @Field(() => [String])
-     @IsDefined()
-     @IsArray()
-     values: TOrderDirection[];
-   }
-
-   @InputType()
-   export class FindOptionsDto {
-     @Field(() => FilterDto, { nullable: true })
-     @IsOptional()
-     @ValidateNested({ each: true })
-     @Type(() => FilterDto)
-     where?: Filter;
-
-     @Field(() => OrderByDto, { nullable: true })
-     @IsOptional()
-     @ValidateNested({ each: true })
-     @Type(() => OrderByDto)
-     order?: OrderByDto;
-   }
-
-   export { ConditionalOperator, LogicalOperator };
-   ```
-
-*Note*: Import `ConditionalOperator` and `LogicalOperator` from your code's `src/lib/filter.ts` in your `controllers/resolvers/services/etc`. This is because you've registered them in `src/lib/filter.ts` using `registerEnumType`(nestjs code-first approach). Therefore the metadata are associated with these. Hence importing them from `'typeorm-advanced-filter-util'` and re-registering them elsewhere in your code will cause nestjs graphql to throw a duplicate type error.
-
-*Note*: We used `class-valdiator` and `class-transformer` for validation
-
-2. In`dto/get-organisations.dto.ts`:
+On the backend:
 
 ```typescript
-import { FindOptionsDto } from 'src/lib/filter.ts';
-import {
-InputType,
-Field
-} from '@nestjs/graphql';
-import { Type } from 'class-transformer';
-import { ValidateNested, IsOptional } from 'class-validator';
+    const res: User[] = await User.find({
+      where: where<User>({
+        orders: {
+          id: {
+            $isNull: null,
+          },
+        },
+      }),
+    });
 
-
-@InputType()
-export class GetOrganisationsDto {
-  @ValidateNested({ each: true })
-  @Type(() => PaginationOptionsDto)
-  @Field(() => PaginationOptionsDto)
-  paginateOptions: PaginationOptionsDto;
-
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => FindOptionsDto)
-  @Field(() => FindOptionsDto, { nullable: true })
-  findOptions?: FindOptionsDto;
-}
+    expect(res.length).toBe(1);
+    expect(res.at(0)?.firsName).toBe('Mary');
 ```
-
-The `PaginationOptionsDto` was crafted with `Pagination` from `nestjs-typeorm-paginate`
-
-3. In`organisation.resolver.ts`
-
-```typescript
- @Query((_returns) => GetOrganisationsResponseDto)
- public async getOrganisations(
-   @Args('getOrganisationsDto')
-   getOrganisationsDto: GetOrganisationsDto,
- ): Promise<GetOrganisationsResponseDto> {
-
-   return this.organisationSvc.getOrganisations(getOrganisationsDto);
- }
-```
-
-4. In`organisation.service.ts`
-
-```typescript
-import { buildWhere, Filter , OrderBy, buildOrder} from 'typeorm-advanced-filter-util';
-import { FindManyOptions, Repository } from 'typeorm';
-import {
-paginate,
-IPaginationOptions,
-IPaginationMeta,
-} from 'nestjs-typeorm-paginate';
-
-
-public async getOrganisations(
-   data: GetOrganisationsDto,
- ): Promise<GetOrganisationsResponseDto> {
-   try {
-     const { paginateOptions, findOptions } = data;
-     const paginationOptions: IPaginationOptions<IPaginationMeta> = {
-       ...(paginateOptions as IPaginationOptions),
-       route: '/organisation',
-     };
-     const searchOptions: FindManyOptions<OrganisationEntity> = {
-       where: findOptions?.where ? buildWhere(<Filter>findOptions.where) : {},
-       order: findOptions?.order
-         ? buildOrder(<OrderBy>findOptions?.order)
-         : {},
-     };
-     const organisations = await paginate<OrganisationEntity>(
-       this.repository,
-       paginationOptions,
-       searchOptions,
-     );
-
-     return {
-       error: [],
-       status: HttpStatus.OK,
-       organisations: getStruct(organisations),
-     };
-   } catch (error) {
-     return {
-       error: [],
-       status: HttpStatus.INTERNAL_SERVER_ERROR,
-       organisations: null,
-     };
-   }
- }
-```
-
-Notice we used `nestjs-typeorm-paginate` for pagination but you can use whatever applies in your implementation.
-
-## Logical Operators
-
-### Making an `AND` filter query/request
-
-```typescript
-const mockFilterInput: Filter = {
-      logicalOperator: LogicalOperator.AND,
-      filters: [
-        {
-          fields: ['firstname'],
-          operators: [ConditionalOperator.ILike],
-          values: ['%fred #%'],
-        },
-        {
-          fields: ['lastname'],
-          operators: [ConditionalOperator.Like],
-          values: ['%Doh #%'],
-        },
-      ],
-    };
-```
-
-### Making an `OR` filter query/request
-
-```typescript
- const mockFilterInput: Filter = {
-      logicalOperator: LogicalOperator.OR,
-      filters: [
-        {
-          fields: ['username'],
-          operators: [ConditionalOperator.Equal],
-          values: ['johndoe'],
-        },
-        {
-          fields: ['email'],
-          operators: [ConditionalOperator.Equal],
-          values: ['johndoe@gmail.com'],
-        },
-        {
-          fields: ['phone'],
-          operators: [ConditionalOperator.Equal],
-          values: ['+233247000000'],
-        },
-      ],
-    };
-```
-
-### Making an `AND OR` filter query/request
-
-const mockFilterInput: Filter = {
-
-```typescript
-  const mockFilterInput: Filter = {
-      logicalOperator: LogicalOperator.OR,
-      filters: [
-        {
-          fields: ['firstname', 'lastname', 'age'],
-          operators: [ConditionalOperator.ILike, ConditionalOperator.ILike, ConditionalOperator.Equal],
-          values: ['john', 'doe', '30'],
-        },
-        {
-          fields: ['powerups'],
-          operators: [ConditionalOperator.NotLessThan],
-          values: ['400'],
-        },
-        {
-          fields: ['ratings', 'likes'],
-          operators: [ConditionalOperator.MoreThanOrEqual, ConditionalOperator.Between],
-          values: ['3', JSON.stringify([100, 500])],
-        },
-        {
-          fields: ['tags'],
-          operators: [ConditionalOperator.In],
-          values: [JSON.stringify(['courageous', 'strong', 'skillful'])],
-        },
-      ],
-    };
-```
-
-*Note*:  For array types like between, in, etc, make sure to JSON.stringify the array.
-
-Issues, contributions etc are welcome. Thanks 😉
