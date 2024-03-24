@@ -1,5 +1,3 @@
-import { FindOperatorType } from 'typeorm';
-
 export type TPartialOperatorMap<V> = Partial<TOperatorMap<V>>;
 
 export type TOperatorMap<V> = {
@@ -21,10 +19,6 @@ export type TOperatorMap<V> = {
   $raw: V;
 };
 
-export type TFindOptionsWhereProperty<Property> = Property extends object
-  ? NonNullable<Property>
-  : NonNullable<TPartialOperatorMap<Property>>;
-
 type Primitive = string | number | boolean;
 type Nullish = null | undefined;
 
@@ -37,8 +31,6 @@ export type Filter<Entity> = {
     ? Filter<Entity[P]>
     : NonNullable<TPartialOperatorMap<Entity[P]>>;
 };
-
-export type TOperatorMapKey = `$${FindOperatorType}`;
 
 export type Order<Entity> = {
   [P in keyof Entity]?: Entity[P] extends Array<Primitive> | Nullish
