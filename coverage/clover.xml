@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1711290883378" clover="3.2.0">
-  <project timestamp="1711290883378" name="All files">
-    <metrics statements="149" coveredstatements="143" conditionals="36" coveredconditionals="27" methods="35" coveredmethods="35" elements="220" coveredelements="205" complexity="0" loc="149" ncloc="149" packages="2" files="8" classes="8"/>
-    <package name="filter-utils">
-      <metrics statements="69" coveredstatements="63" conditionals="28" coveredconditionals="19" methods="13" coveredmethods="13"/>
-      <file name="index.ts" path="/Users/alfreddohnani/Documents/Dev/OCTOBER/PROJECTS/typeorm-advanced-filter-util/src/filter-utils/index.ts">
+<coverage generated="1711294009372" clover="3.2.0">
+  <project timestamp="1711294009372" name="All files">
+    <metrics statements="149" coveredstatements="143" conditionals="36" coveredconditionals="27" methods="35" coveredmethods="35" elements="220" coveredelements="205" complexity="0" loc="149" ncloc="149" packages="3" files="8" classes="8"/>
+    <package name="src">
+      <metrics statements="2" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="index.ts" path="/Users/alfreddohnani/Documents/Dev/OCTOBER/typeorm-where/src/index.ts">
         <metrics statements="2" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="0" type="stmt"/>
         <line num="2" count="0" type="stmt"/>
       </file>
-      <file name="where-builder.ts" path="/Users/alfreddohnani/Documents/Dev/OCTOBER/PROJECTS/typeorm-advanced-filter-util/src/filter-utils/where-builder.ts">
+    </package>
+    <package name="src.filter-utils">
+      <metrics statements="67" coveredstatements="63" conditionals="28" coveredconditionals="19" methods="13" coveredmethods="13"/>
+      <file name="where-builder.ts" path="/Users/alfreddohnani/Documents/Dev/OCTOBER/typeorm-where/src/filter-utils/where-builder.ts">
         <metrics statements="67" coveredstatements="63" conditionals="28" coveredconditionals="19" methods="13" coveredmethods="13"/>
         <line num="1" count="1" type="stmt"/>
         <line num="22" count="1" type="stmt"/>
@@ -80,9 +83,9 @@
         <line num="149" count="25" type="stmt"/>
       </file>
     </package>
-    <package name="tests.utils.entities">
+    <package name="src.tests.utils.entities">
       <metrics statements="80" coveredstatements="80" conditionals="8" coveredconditionals="8" methods="22" coveredmethods="22"/>
-      <file name="category.entity.ts" path="/Users/alfreddohnani/Documents/Dev/OCTOBER/PROJECTS/typeorm-advanced-filter-util/src/tests/utils/entities/category.entity.ts">
+      <file name="category.entity.ts" path="/Users/alfreddohnani/Documents/Dev/OCTOBER/typeorm-where/src/tests/utils/entities/category.entity.ts">
         <metrics statements="8" coveredstatements="8" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
         <line num="1" count="1" type="stmt"/>
         <line num="10" count="1" type="stmt"/>
@@ -93,7 +96,7 @@
         <line num="23" count="1" type="stmt"/>
         <line num="26" count="1" type="stmt"/>
       </file>
-      <file name="order-item.entity.ts" path="/Users/alfreddohnani/Documents/Dev/OCTOBER/PROJECTS/typeorm-advanced-filter-util/src/tests/utils/entities/order-item.entity.ts">
+      <file name="order-item.entity.ts" path="/Users/alfreddohnani/Documents/Dev/OCTOBER/typeorm-where/src/tests/utils/entities/order-item.entity.ts">
         <metrics statements="10" coveredstatements="10" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="3"/>
         <line num="1" count="1" type="stmt"/>
         <line num="11" count="1" type="stmt"/>
@@ -106,7 +109,7 @@
         <line num="28" count="1" type="stmt"/>
         <line num="31" count="1" type="stmt"/>
       </file>
-      <file name="order.entity.ts" path="/Users/alfreddohnani/Documents/Dev/OCTOBER/PROJECTS/typeorm-advanced-filter-util/src/tests/utils/entities/order.entity.ts">
+      <file name="order.entity.ts" path="/Users/alfreddohnani/Documents/Dev/OCTOBER/typeorm-where/src/tests/utils/entities/order.entity.ts">
         <metrics statements="13" coveredstatements="13" conditionals="2" coveredconditionals="2" methods="5" coveredmethods="5"/>
         <line num="1" count="1" type="stmt"/>
         <line num="11" count="1" type="stmt"/>
@@ -122,7 +125,7 @@
         <line num="33" count="1" type="stmt"/>
         <line num="36" count="1" type="stmt"/>
       </file>
-      <file name="payment.entity.ts" path="/Users/alfreddohnani/Documents/Dev/OCTOBER/PROJECTS/typeorm-advanced-filter-util/src/tests/utils/entities/payment.entity.ts">
+      <file name="payment.entity.ts" path="/Users/alfreddohnani/Documents/Dev/OCTOBER/typeorm-where/src/tests/utils/entities/payment.entity.ts">
         <metrics statements="21" coveredstatements="21" conditionals="4" coveredconditionals="4" methods="5" coveredmethods="5"/>
         <line num="1" count="1" type="stmt"/>
         <line num="11" count="1" type="stmt"/>
@@ -146,7 +149,7 @@
         <line num="45" count="1" type="stmt"/>
         <line num="48" count="1" type="stmt"/>
       </file>
-      <file name="product.entity.ts" path="/Users/alfreddohnani/Documents/Dev/OCTOBER/PROJECTS/typeorm-advanced-filter-util/src/tests/utils/entities/product.entity.ts">
+      <file name="product.entity.ts" path="/Users/alfreddohnani/Documents/Dev/OCTOBER/typeorm-where/src/tests/utils/entities/product.entity.ts">
         <metrics statements="11" coveredstatements="11" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
         <line num="1" count="1" type="stmt"/>
         <line num="10" count="1" type="stmt"/>
@@ -160,7 +163,7 @@
         <line num="37" count="1" type="stmt"/>
         <line num="40" count="1" type="stmt"/>
       </file>
-      <file name="user.entity.ts" path="/Users/alfreddohnani/Documents/Dev/OCTOBER/PROJECTS/typeorm-advanced-filter-util/src/tests/utils/entities/user.entity.ts">
+      <file name="user.entity.ts" path="/Users/alfreddohnani/Documents/Dev/OCTOBER/typeorm-where/src/tests/utils/entities/user.entity.ts">
         <metrics statements="17" coveredstatements="17" conditionals="2" coveredconditionals="2" methods="5" coveredmethods="5"/>
         <line num="1" count="1" type="stmt"/>
         <line num="10" count="1" type="stmt"/>
